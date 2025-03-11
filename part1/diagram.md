@@ -1,3 +1,5 @@
+# Task 0
+
 **High-Level Package Diagram for HBnB Evolution**
 
 ## **1. Context and Objective**
@@ -189,4 +191,160 @@ classDiagram
 ---
 
 This package diagram provides a **clear and modular architecture** for the HBnB Evolution application, ensuring **scalability and maintainability**. 🚀
+
+# Task 1
+
+```mermaid
+classDiagram
+  %% Business Logic
+  class User {
+    -id: UUID
+    -firstName: string
+    -lastName: string
+    -email: string
+    -password: string
+    -isAdmin: boolean
+    -createdAt: datetime
+    -updatedAt: datetime
+    +createUser()
+    +updateUser()
+    +deleteUser()
+  }
+
+  class Place {
+    -id: UUID
+    -title: string
+    -description: string
+    -price: float
+    -latitude: float
+    -longitude: float
+    -ownerId: UUID
+    -createdAt: datetime
+    -updatedAt: datetime
+    +createPlace()
+    +updatePlace()
+    +deletePlace()
+  }
+
+  class Review {
+    -id: UUID
+    -rating: int
+    -comment: string
+    -userId: UUID
+    -placeId: UUID
+    -createdAt: datetime
+    -updatedAt: datetime
+    +createReview()
+    +updateReview()
+    +deleteReview()
+  }
+
+  class Amenity {
+    -id: UUID
+    -name: string
+    -description: string
+    -createdAt: datetime
+    -updatedAt: datetime
+    +createAmenity()
+    +updateAmenity()
+    +deleteAmenity()
+  }
+
+  %% Relations entre entités métier
+  User "1" *-- "0..*" Place : owns
+  User "1" *-- "0..*" Review : writes
+  Place "1" *-- "1..*" Review : has
+  Place "0..*" o-- "0..*" Amenity : includes
+```
+
+# Entities and Their Roles
+
+## 1️⃣ User (User Account)
+📌 **Role**: The User entity represents platform users, whether they are regular customers or administrators. Users can create property listings (Place) and write reviews (Review).
+
+### 🛠 Key Attributes:
+- **id (UUID)**: Unique identifier.
+- **firstName, lastName (string)**: Personal information.
+- **email (string)**: Unique login identifier.
+- **password (string)**: Secure password.
+- **isAdmin (boolean)**: Admin status indicator.
+- **createdAt, updatedAt (datetime)**: Timestamps for record history.
+
+### 🔹 Methods:
+- **createUser()**: Registers a new user.
+- **updateUser()**: Updates user profile details.
+- **deleteUser()**: Deletes a user account.
+
+---
+
+## 2️⃣ Place (Property Listing)
+📌 **Role**: The Place entity represents a property that users can list and manage on the platform.
+
+### 🛠 Key Attributes:
+- **id (UUID)**: Unique identifier for the listing.
+- **title (string)**: Listing title.
+- **description (string)**: Details and information about the property.
+- **price (float)**: Rental price.
+- **latitude, longitude (float)**: Geographical location.
+- **ownerId (UUID)**: ID of the listing owner (User).
+- **createdAt, updatedAt (datetime)**: Record history timestamps.
+
+### 🔹 Methods:
+- **createPlace()**: Creates a new property listing.
+- **updatePlace()**: Updates listing details.
+- **deletePlace()**: Deletes a property listing.
+
+---
+
+## 3️⃣ Review (User Review)
+📌 **Role**: The Review entity allows users to leave feedback on a property they have rented.
+
+### 🛠 Key Attributes:
+- **id (UUID)**: Unique identifier for the review.
+- **rating (int)**: Rating given to the property (e.g., 1-5 stars).
+- **comment (string)**: User feedback message.
+- **userId (UUID)**: ID of the user who wrote the review.
+- **placeId (UUID)**: ID of the property being reviewed.
+- **createdAt, updatedAt (datetime)**: Review history timestamps.
+
+### 🔹 Methods:
+- **createReview()**: Creates a new review.
+- **updateReview()**: Modifies an existing review.
+- **deleteReview()**: Deletes a review.
+
+---
+
+## 4️⃣ Amenity (Property Feature)
+📌 **Role**: The Amenity entity represents features or services that a property can offer (WiFi, swimming pool, parking, etc.).
+
+### 🛠 Key Attributes:
+- **id (UUID)**: Unique identifier.
+- **name (string)**: Amenity name (e.g., "WiFi", "Pool").
+- **description (string)**: Additional details.
+- **createdAt, updatedAt (datetime)**: Timestamps for record history.
+
+### 🔹 Methods:
+- **createAmenity()**: Creates a new amenity.
+- **updateAmenity()**: Updates an amenity's details.
+- **deleteAmenity()**: Deletes an amenity.
+
+---
+
+# Relationships Between Entities
+
+## 1️⃣ Relationship: User "1" *-- "0..*" Place (A user owns multiple properties)
+- A User can be the owner of multiple Place listings.
+- A Place must belong to a single User (its owner).
+
+## 2️⃣ Relationship: User "1" *-- "0..*" Review (A user writes multiple reviews)
+- A User can write multiple Review entries for different properties.
+- Each Review must be written by one User.
+
+## 3️⃣ Relationship: Place "1" *-- "1..*" Review (A property must have at least one review)
+- A Place can receive multiple Review entries.
+- A Review is always attached to a single Place.
+
+## 4️⃣ Relationship: Place "0..*" o-- "0..*" Amenity (A property includes multiple amenities)
+- A Place can offer multiple Amenity options (such as WiFi, TV, air conditioning).
+- An Amenity can be shared among multiple Places (e.g., many properties offer WiFi).
 
