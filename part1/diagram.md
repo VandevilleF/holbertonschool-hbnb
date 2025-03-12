@@ -348,3 +348,174 @@ classDiagram
 - A Place can offer multiple Amenity options (such as WiFi, TV, air conditioning).
 - An Amenity can be shared among multiple Places (e.g., many properties offer WiFi).
 
+
+# Task 2
+
+## 1️⃣ User Registration
+### 📍 Description
+This API allows a user to sign up by providing personal details (firstName, lastName, email, password).
+
+### 🎯 Purpose of the Diagram
+To visualize the interactions between the layers to validate the email and store the user in the database.
+
+### 🔄 Interaction Flow
+The Client sends a POST /register request with user details.
+APIController validates the input and forwards the request to ServiceManager.
+ServiceManager calls ApplicationFacade to check if the email already exists.
+ApplicationFacade queries Repository, which retrieves data via DatabaseManager.
+If the email is available, ApplicationFacade saves the new user.
+Repository stores the user in DatabaseManager.
+A 201 Created response is returned with the new user ID.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant APIController
+    participant ServiceManager
+    participant ApplicationFacade
+    participant Repository
+    participant DatabaseManager
+
+    Client->>APIController: POST /register (user data)
+    APIController->>ServiceManager: validate user data
+    ServiceManager->>ApplicationFacade: check if email exists
+    ApplicationFacade->>Repository: getUserByEmail(email)
+    Repository->>DatabaseManager: SELECT * FROM users WHERE email = ?
+    DatabaseManager-->>Repository: User not found
+    Repository-->>ApplicationFacade: User is valid
+    ApplicationFacade-->>ServiceManager: User is valid
+    ServiceManager->>ApplicationFacade: save user
+    ApplicationFacade->>Repository: saveUser(user)
+    Repository->>DatabaseManager: INSERT INTO users VALUES (...)
+    DatabaseManager-->>Repository: User saved
+    Repository-->>ApplicationFacade: User created
+    ApplicationFacade-->>ServiceManager: User created
+    ServiceManager-->>APIController: Success (User ID)
+    APIController-->>Client: 201 Created
+```
+
+## 2️⃣ Place Creation
+### 📍 Description
+An authenticated user can create a new place (title, description, price, latitude, longitude, etc.).
+
+### 🎯 Purpose of the Diagram
+To illustrate how the API ensures the user exists before storing the place in the database.
+
+### 🔄 Interaction Flow
+The Client sends a POST /places request with place details.
+APIController forwards the data to ServiceManager, which verifies that the ownerId is a valid user.
+ApplicationFacade checks for the user in Repository (DatabaseManager).
+If the user is valid, ApplicationFacade stores the new place.
+Repository saves the record via DatabaseManager.
+A 201 Created response is returned with the place ID.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant APIController
+    participant ServiceManager
+    participant ApplicationFacade
+    participant Repository
+    participant DatabaseManager
+
+    Client->>APIController: POST /places (place data)
+    APIController->>ServiceManager: validate place data
+    ServiceManager->>ApplicationFacade: check owner exists
+    ApplicationFacade->>Repository: getUserById(ownerId)
+    Repository->>DatabaseManager: SELECT * FROM users WHERE id = ?
+    DatabaseManager-->>Repository: User found
+    Repository-->>ApplicationFacade: User is valid
+    ApplicationFacade-->>ServiceManager: User is valid
+    ServiceManager->>ApplicationFacade: save place
+    ApplicationFacade->>Repository: savePlace(place)
+    Repository->>DatabaseManager: INSERT INTO places VALUES (...)
+    DatabaseManager-->>Repository: Place saved
+    Repository-->>ApplicationFacade: Place created
+    ApplicationFacade-->>ServiceManager: Place created
+    ServiceManager-->>APIController: Success (Place ID)
+    APIController-->>Client: 201 Created
+```
+
+## 3️⃣ Review Submission
+### 📍 Description
+A user can submit a review (rating, comment) for a place.
+
+### 🎯 Purpose of the Diagram
+To show how the system validates the user and place before saving the review.
+
+### 🔄 Interaction Flow
+The Client sends a POST /reviews request with review details.
+APIController validates the request and forwards it to ServiceManager.
+ServiceManager calls ApplicationFacade to verify the user exists (Repository, DatabaseManager).
+ApplicationFacade then checks if the place exists.
+If everything is valid, ApplicationFacade stores the review.
+Repository saves the review in DatabaseManager.
+A 201 Created response is sent back with the review ID.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant APIController
+    participant ServiceManager
+    participant ApplicationFacade
+    participant Repository
+    participant DatabaseManager
+
+    Client->>APIController: POST /reviews (review data)
+    APIController->>ServiceManager: validate review
+    ServiceManager->>ApplicationFacade: check user exists
+    ApplicationFacade->>Repository: getUserById(userId)
+    Repository->>DatabaseManager: SELECT * FROM users WHERE id = ?
+    DatabaseManager-->>Repository: User found
+    Repository-->>ApplicationFacade: User valid
+    ApplicationFacade-->>ServiceManager: User valid
+    ServiceManager->>ApplicationFacade: check place exists
+    ApplicationFacade->>Repository: getPlaceById(placeId)
+    Repository->>DatabaseManager: SELECT * FROM places WHERE id = ?
+    DatabaseManager-->>Repository: Place found
+    Repository-->>ApplicationFacade: Place valid
+    ApplicationFacade-->>ServiceManager: Place valid
+    ServiceManager->>ApplicationFacade: save review
+    ApplicationFacade->>Repository: saveReview(review)
+    Repository->>DatabaseManager: INSERT INTO reviews VALUES (...)
+    DatabaseManager-->>Repository: Review saved
+    Repository-->>ApplicationFacade: Review created
+    ApplicationFacade-->>ServiceManager: Review created
+    ServiceManager-->>APIController: Success (Review ID)
+    APIController-->>Client: 201 Created
+```
+
+## 4️⃣ Fetching Places
+### 📍 Description
+A user can retrieve a list of places based on filters (price, location, etc.).
+
+### 🎯 Purpose of the Diagram
+To illustrate how the API retrieves filtered places from the database.
+
+### 🔄 Interaction Flow
+The Client sends a GET /places?filters request.
+APIController forwards the request to ServiceManager, which sends it to ApplicationFacade.
+ApplicationFacade calls Repository, which generates an SQL query via DatabaseManager.
+DatabaseManager returns the matching places.
+The data is sent back to the client with a 200 OK response.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant APIController
+    participant ServiceManager
+    participant ApplicationFacade
+    participant Repository
+    participant DatabaseManager
+
+    Client->>APIController: GET /places?filters
+    APIController->>ServiceManager: fetch places with filters
+    ServiceManager->>ApplicationFacade: get places with filters
+    ApplicationFacade->>Repository: getPlaces(filters)
+    Repository->>DatabaseManager: SELECT * FROM places WHERE filters
+    DatabaseManager-->>Repository: List of places
+    Repository-->>ApplicationFacade: List of places
+    ApplicationFacade-->>ServiceManager: List of places
+    ServiceManager-->>APIController: List of places
+    APIController-->>Client: 200 OK
+```
