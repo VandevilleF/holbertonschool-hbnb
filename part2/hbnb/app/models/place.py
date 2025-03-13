@@ -3,8 +3,6 @@
 """
 from app.models.base_model import BaseModel
 from app.models.user import User
-from app.models.review import Review
-from app.models.amenity import Amenity
 
 
 class Place(BaseModel):
@@ -40,6 +38,7 @@ class Place(BaseModel):
     def add_review(self, review):
         """ Add a review to the place.
         """
+        from app.models.review import Review
         if isinstance(review, Review):
             self.reviews.append(review)
         else:
@@ -48,6 +47,7 @@ class Place(BaseModel):
     def add_amenity(self, amenity):
         """ Add a amenity to the place.
         """
+        from app.models.amenity import Amenity
         if isinstance(amenity, Amenity):
             self.amenities.append(amenity)
         else:

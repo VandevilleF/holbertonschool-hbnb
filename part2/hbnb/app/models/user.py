@@ -2,7 +2,6 @@
 """ User Module
 """
 from app.models.base_model import BaseModel
-from app.models.place import Place
 from app.utils.validators import is_valid_email
 
 REGISTERED_EMAILS = set()
@@ -33,8 +32,8 @@ class User(BaseModel):
     def add_place(self, place):
         """ Add a place to the user.
         """
+        from app.models.place import Place
         if isinstance(place, Place):
-             self.place.append(place)
+            self.place.append(place)
         else:
             raise ValueError("Invalid: place must be an instance of Place.")
-
